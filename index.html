@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotstar Link to Filename Generator</title>
+    <title>Hotstar Filename Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -21,6 +21,7 @@
         h1 {
             color: #333;
             text-align: center;
+            margin-bottom: 30px;
         }
         .input-group {
             margin-bottom: 20px;
@@ -37,7 +38,7 @@
             border-radius: 5px;
             font-size: 16px;
         }
-        button {
+        .generate-btn {
             background-color: #007bff;
             color: white;
             padding: 12px 30px;
@@ -46,48 +47,46 @@
             cursor: pointer;
             font-size: 16px;
             width: 100%;
+            margin-bottom: 20px;
         }
-        button:hover {
+        .generate-btn:hover {
             background-color: #0056b3;
         }
         .results {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #f8f9fa;
+            display: none;
+        }
+        .filename-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
             border-radius: 5px;
-        }
-        .filename-item {
-            display: flex;
-            align-items: center;
+            padding: 15px;
             margin: 10px 0;
-            gap: 15px;
-        }
-        .filename-text {
-            flex: 1;
             font-family: monospace;
             font-size: 14px;
-            padding: 10px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            word-break: break-all;
-        }
-        .copy-btn {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.3s;
-            min-width: 80px;
+            transition: all 0.3s ease;
+            word-break: break-all;
+            line-height: 1.4;
         }
-        .copy-btn:hover {
-            background-color: #545b62;
+        .filename-box:hover {
+            background: #e9ecef;
+            border-color: #007bff;
         }
-        .copy-btn.copied {
-            background-color: #28a745 !important;
+        .filename-box.copied {
+            background: #d4edda !important;
+            border-color: #28a745 !important;
+            transform: scale(1.02);
+        }
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #28a745;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .status.show {
+            opacity: 1;
         }
     </style>
 </head>
@@ -100,10 +99,11 @@
             <input type="url" id="hotstarLink" placeholder="https://www.hotstar.com/in/shows/..." />
         </div>
         
-        <button onclick="generateFilenames()">Generate Filenames</button>
+        <button class="generate-btn" onclick="generateFilenames()">Generate Filenames</button>
         
-        <div id="results" class="results" style="display: none;">
+        <div id="results" class="results">
             <div id="filenameList"></div>
+            <div id="status" class="status">Filename copied to clipboard!</div>
         </div>
     </div>
 
@@ -174,29 +174,35 @@
             filenameList.innerHTML = '';
             
             filenames.forEach((filename, index) => {
-                const filenameItem = document.createElement('div');
-                filenameItem.className = 'filename-item';
-                filenameItem.innerHTML = `
-                    <div class="filename-text">${filename}</div>
-                    <button class="copy-btn" id="copyBtn${index}" onclick="copyToClipboard('${filename}', ${index})">Copy</button>
-                `;
-                filenameList.appendChild(filenameItem);
+                const filenameBox = document.createElement('div');
+                filenameBox.className = 'filename-box';
+                filenameBox.textContent = filename;
+                filenameBox.onclick = () => copyFilename(filename, filenameBox);
+                filenameList.appendChild(filenameBox);
             });
             
             resultsDiv.style.display = 'block';
         }
         
-        function copyToClipboard(text, buttonIndex) {
-            navigator.clipboard.writeText(text).then(() => {
-                const button = document.getElementById(`copyBtn${buttonIndex}`);
-                button.classList.add('copied');
-                button.textContent = 'Copied!';
+        function copyFilename(filename, element) {
+            navigator.clipboard.writeText(filename).then(() => {
+                // Show visual feedback
+                element.classList.add('copied');
+                showStatus();
                 
+                // Reset after 1 second
                 setTimeout(() => {
-                    button.classList.remove('copied');
-                    button.textContent = 'Copy';
-                }, 1500);
+                    element.classList.remove('copied');
+                }, 1000);
             });
+        }
+        
+        function showStatus() {
+            const status = document.getElementById('status');
+            status.classList.add('show');
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 2000);
         }
         
         // Auto-generate when user pastes a link
