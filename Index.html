@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotstar Link to Filename Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .filename-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            gap: 10px;
+        }
+        .filename-text {
+            flex: 1;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        .copy-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+        .copy-btn:hover {
+            background-color: #545b62;
+        }
+        .copy-btn.copied {
+            background-color: #28a745 !important;
+            transform: scale(1.05);
+        }
+        .copy-btn.copied:after {
+            content: " ✓";
+        }
+        .quality-label {
+            font-weight: bold;
+            color: #007bff;
+            min-width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hotstar Link to Filename Generator</h1>
+        
+        <div class="input-group">
+            <label for="hotstarLink">Paste Hotstar Link:</label>
+            <input type="url" id="hotstarLink" placeholder="https://www.hotstar.com/in/shows/..." />
+        </div>
+        
+        <button onclick="generateFilenames()">Generate Filenames</button>
+        
+        <div id="results" class="results" style="display: none;">
+            <h3>Generated Filenames:</h3>
+            <div id="filenameList"></div>
+        </div>
+    </div>
+
+    <script>
+        function generateFilenames() {
+            const link = document.getElementById('hotstarLink').value;
+            
+            if (!link) {
+                alert('Please enter a Hotstar link');
+                return;
+            }
+            
+            // Extract show name and episode info from URL
+            const urlParts = link.split('/');
+            const showName = extractShowName(urlParts);
+            const episodeInfo = extractEpisodeInfo(link);
+            
+            // Quality options
+            const qualities = ['240p', '360p', '480p', '720p', '1080p'];
+            
+            // Generate filenames
+            const filenames = qualities.map((quality, index) => {
+                return {
+                    quality: quality,
+                    filename: `${showName}.${episodeInfo}.${quality}.JH.WEB-DL.Kannada.AAC2.0.H.264.mkv`
+                };
+            });
+            
+            displayResults(filenames);
+        }
+        
+        function extractShowName(urlParts) {
+            // Find the show name from URL structure
+            let showName = '';
+            for (let i = 0; i < urlParts.length; i++) {
+                if (urlParts[i] === 'shows' && urlParts[i + 1]) {
+                    showName = urlParts[i + 1];
+                    break;
+                }
+            }
+            
+            // Convert to proper format
+            return showName.split('-').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join('.');
+        }
+        
+        function extractEpisodeInfo(link) {
+            // Extract episode information from the URL
+            const urlParts = link.split('/');
+            let episodeTitle = '';
+            
+            // Look for episode title in URL (usually the second-to-last meaningful part)
+            for (let i = urlParts.length - 1; i >= 0; i--) {
+                if (urlParts[i] && urlParts[i] !== 'watch' && urlParts[i].includes('-') && !urlParts[i].match(/^\d+$/)) {
+                    episodeTitle = urlParts[i];
+                    break;
+                }
+            }
+            
+            // If we have episode title, format it
+            if (episodeTitle) {
+                episodeTitle = episodeTitle.split('-').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join('.');
+            }
+            
+            // Generate season and episode number (you can modify this logic)
+            const seasonEpisode = 'S11E091'; // Default format, can be extracted from URL structure
+            
+            return `${seasonEpisode}.${episodeTitle}`;
+        }
+        
+        function displayResults(filenames) {
+            const resultsDiv = document.getElementById('results');
+            const filenameList = document.getElementById('filenameList');
+            
+            filenameList.innerHTML = '';
+            
+            filenames.forEach((item, index) => {
+                const filenameRow = document.createElement('div');
+                filenameRow.className = 'filename-row';
+                filenameRow.innerHTML = `
+                    <div class="quality-label">${item.quality}</div>
+                    <div class="filename-text">${item.filename}</div>
+                    <button class="copy-btn" id="copyBtn${index}" onclick="copyToClipboard('${item.filename}', ${index})">Copy</button>
+                `;
+                filenameList.appendChild(filenameRow);
+            });
+            
+            resultsDiv.style.display = 'block';
+        }
+        
+        function copyToClipboard(text, buttonIndex) {
+            navigator.clipboard.writeText(text).then(() => {
+                const button = document.getElementById(`copyBtn${buttonIndex}`);
+                button.classList.add('copied');
+                button.textContent = 'Copied';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+        
+        // Auto-generate when user pastes a link
+        document.getElementById('hotstarLink').addEventListener('paste', function() {
+            setTimeout(() => {
+                if (this.value) {
+                    generateFilenames();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
