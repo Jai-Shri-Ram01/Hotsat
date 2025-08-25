@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -55,57 +55,45 @@
             padding: 20px;
             background-color: #f8f9fa;
             border-radius: 5px;
-            border-left: 4px solid #007bff;
         }
-        .filename-row {
+        .filename-item {
             display: flex;
             align-items: center;
             margin: 10px 0;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            gap: 10px;
+            gap: 15px;
         }
         .filename-text {
             flex: 1;
             font-family: monospace;
             font-size: 14px;
-            word-break: break-all;
+            padding: 10px;
             background: white;
-            padding: 8px;
-            border-radius: 3px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            word-break: break-all;
         }
         .copy-btn {
             background-color: #6c757d;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 3px;
+            padding: 10px 20px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
-            transition: all 0.3s ease;
-            min-width: 60px;
+            transition: background-color 0.3s;
+            min-width: 80px;
         }
         .copy-btn:hover {
             background-color: #545b62;
         }
         .copy-btn.copied {
             background-color: #28a745 !important;
-            transform: scale(1.05);
-        }
-        .copy-btn.copied:after {
-            content: " ✓";
-        }
-        .quality-label {
-            font-weight: bold;
-            color: #007bff;
-            min-width: 50px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Hotstar Link to Filename Generator</h1>
+        <h1>Hotstar Filename Generator</h1>
         
         <div class="input-group">
             <label for="hotstarLink">Paste Hotstar Link:</label>
@@ -115,7 +103,6 @@
         <button onclick="generateFilenames()">Generate Filenames</button>
         
         <div id="results" class="results" style="display: none;">
-            <h3>Generated Filenames:</h3>
             <div id="filenameList"></div>
         </div>
     </div>
@@ -138,18 +125,14 @@
             const qualities = ['240p', '360p', '480p', '720p', '1080p'];
             
             // Generate filenames
-            const filenames = qualities.map((quality, index) => {
-                return {
-                    quality: quality,
-                    filename: `${showName}.${episodeInfo}.${quality}.JH.WEB-DL.Kannada.AAC2.0.H.264.mkv`
-                };
+            const filenames = qualities.map(quality => {
+                return `${showName}.${episodeInfo}.${quality}.JH.WEB-DL.Kannada.AAC2.0.H.264.mkv`;
             });
             
             displayResults(filenames);
         }
         
         function extractShowName(urlParts) {
-            // Find the show name from URL structure
             let showName = '';
             for (let i = 0; i < urlParts.length; i++) {
                 if (urlParts[i] === 'shows' && urlParts[i + 1]) {
@@ -158,18 +141,15 @@
                 }
             }
             
-            // Convert to proper format
             return showName.split('-').map(word => 
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join('.');
         }
         
         function extractEpisodeInfo(link) {
-            // Extract episode information from the URL
             const urlParts = link.split('/');
             let episodeTitle = '';
             
-            // Look for episode title in URL (usually the second-to-last meaningful part)
             for (let i = urlParts.length - 1; i >= 0; i--) {
                 if (urlParts[i] && urlParts[i] !== 'watch' && urlParts[i].includes('-') && !urlParts[i].match(/^\d+$/)) {
                     episodeTitle = urlParts[i];
@@ -177,16 +157,13 @@
                 }
             }
             
-            // If we have episode title, format it
             if (episodeTitle) {
                 episodeTitle = episodeTitle.split('-').map(word => 
                     word.charAt(0).toUpperCase() + word.slice(1)
                 ).join('.');
             }
             
-            // Generate season and episode number (you can modify this logic)
-            const seasonEpisode = 'S11E091'; // Default format, can be extracted from URL structure
-            
+            const seasonEpisode = 'S11E091';
             return `${seasonEpisode}.${episodeTitle}`;
         }
         
@@ -196,15 +173,14 @@
             
             filenameList.innerHTML = '';
             
-            filenames.forEach((item, index) => {
-                const filenameRow = document.createElement('div');
-                filenameRow.className = 'filename-row';
-                filenameRow.innerHTML = `
-                    <div class="quality-label">${item.quality}</div>
-                    <div class="filename-text">${item.filename}</div>
-                    <button class="copy-btn" id="copyBtn${index}" onclick="copyToClipboard('${item.filename}', ${index})">Copy</button>
+            filenames.forEach((filename, index) => {
+                const filenameItem = document.createElement('div');
+                filenameItem.className = 'filename-item';
+                filenameItem.innerHTML = `
+                    <div class="filename-text">${filename}</div>
+                    <button class="copy-btn" id="copyBtn${index}" onclick="copyToClipboard('${filename}', ${index})">Copy</button>
                 `;
-                filenameList.appendChild(filenameRow);
+                filenameList.appendChild(filenameItem);
             });
             
             resultsDiv.style.display = 'block';
@@ -214,13 +190,12 @@
             navigator.clipboard.writeText(text).then(() => {
                 const button = document.getElementById(`copyBtn${buttonIndex}`);
                 button.classList.add('copied');
-                button.textContent = 'Copied';
+                button.textContent = 'Copied!';
                 
-                // Reset button after 2 seconds
                 setTimeout(() => {
                     button.classList.remove('copied');
                     button.textContent = 'Copy';
-                }, 2000);
+                }, 1500);
             });
         }
         
